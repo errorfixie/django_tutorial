@@ -1,10 +1,19 @@
 from django.test import TestCase,Client
-from datetime import datetime
+import datetime
 from django.utils import timezone
 from django.urls import reverse
 from .models import Question
 
 # Create your tests here.
+class QuestionModelTest(TestCase):
+    def test_was_published_recently_with_future_question(self):
+        time = timezone.now() + datetime.timedelta(days=30)
+        future_question = Question(pub_date=time)
+
+        self.assertIs(future_question.was_published_recently(),False)
+
+
+
 def create_question(question_text, days):
     time = timezone.now() + datetime.timedelta(days=days)
     return Question.objects.create(question_text=question_text,pub_date=time)
@@ -14,7 +23,7 @@ class QuestionIndeViewTests(TestCase):
         # 질문이 없으면 적절한 메세지를 보여준다
         response = self.client.get(reverse('polls:index'))
         self.assertEqual(response.status_code,200)
-        self.assertContains(response, "No polls are available.")
+        self.assertContains(response, "투표할수가 없다")
         self.assertQuerysetEqual(response.context['latest_question_list'],[])
 
     def test_past_question(self):
